@@ -1,0 +1,9 @@
+1. Extract this folder.
+2. Open the extracted grpc-order-management folder in IntelliJ IDEA.
+3. Ensure Project SDK and Maven importer JDK are set to Java 21.
+4. Reload Maven.
+5. From the root folder run: mvn -U clean verify
+6. Start inventory-service, then payment-service, then order-service using the commands in README.md.
+7. Try the POST /api/v1/orders example in README.md.
+
+Note: PostgreSQL is provisioned for the next persistence milestone; current inventory/payment demo state is in-memory.

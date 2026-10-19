@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package payment.v1;
+
+option java_package = "com.portfolio.contracts.payment.v1";
+option java_multiple_files = true;
+option java_outer_classname = "PaymentProto";
+
+service PaymentService {
+  rpc AuthorizePayment(AuthorizePaymentRequest) returns (AuthorizePaymentResponse);
+  rpc RefundPayment(RefundPaymentRequest) returns (RefundPaymentResponse);
+}
+
+message AuthorizePaymentRequest {
+  string order_id = 1;
+  int64 amount_minor_units = 2;
+  string currency = 3;
+  string idempotency_key = 4;
+}
+
+message AuthorizePaymentResponse {
+  string payment_id = 1;
+  bool authorized = 2;
+  string message = 3;
+}
+
+message RefundPaymentRequest {
+  string payment_id = 1;
+  string order_id = 2;
+  string idempotency_key = 3;
+}
+
+message RefundPaymentResponse {
+  bool refunded = 1;
+}

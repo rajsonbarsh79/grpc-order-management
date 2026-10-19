@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: order-service
+
+  grpc:
+    client:
+      channels:
+        inventory:
+          address: static://localhost:9091
+        payment:
+          address: static://localhost:9092
+
+server:
+  port: 8080
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventory:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        ignoreExceptions:
+          - org.springframework.web.server.ResponseStatusException
+
+      payment:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        ignoreExceptions:
+          - org.springframework.web.server.ResponseStatusException
+
+  retry:
+    instances:
+      inventoryRead:
+        maxAttempts: 3
+        waitDuration: 250ms
+        retryExceptions:
+          - com.portfolio.orders.infrastructure.grpc.OrderDownstreamClient$TransientGrpcException
+        ignoreExceptions:
+          - org.springframework.web.server.ResponseStatusException
+
+  bulkhead:
+    instances:
+      inventory:
+        maxConcurrentCalls: 50
+        maxWaitDuration: 0
+      payment:
+        maxConcurrentCalls: 50
+        maxWaitDuration: 0
+
+  endpoint:
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    io.github.resilience4j: DEBUG
+    io.github.resilience4j.retry: DEBUG
+    io.github.resilience4j.circuitbreaker: DEBUG
+    io.github.resilience4j.bulkhead: DEBUG
+    com.portfolio.orders: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents,retries,retryevents
+
+  endpoint:
+    health:
+      show-details: when_authorized
